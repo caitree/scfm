@@ -18,12 +18,6 @@ from typing import (
     Dict,
 )
 
-from diffusers.loaders.lora_base import _fetch_state_dict
-from diffusers.loaders.lora_conversion_utils import (
-    _convert_bfl_flux_control_lora_to_diffusers,
-    _convert_kohya_flux_lora_to_diffusers,
-    _convert_xlabs_flux_lora_to_diffusers,
-)
 from diffusers.loaders import FluxLoraLoaderMixin
 
 try:
@@ -191,7 +185,7 @@ def dit_lora_merge(dit, lora_paths, names=None) -> None:
         adapter_name = names[i] if names is not None else str(i)
         adapter_names.append(adapter_name)
         lora_state_dict, network_alphas, metadata = lora_lora_state_dict(lora_path, return_alphas=True)
-        
+
         dit.load_lora_adapter(
             lora_state_dict,
             network_alphas=network_alphas,

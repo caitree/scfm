@@ -1,4 +1,4 @@
-# SCFM: Shortcutting Pre-trained Flow Matching Diffusion Models is Almost Free Lunch
+# Shortcutting Pre-trained Flow Matching Diffusion Models is Almost Free Lunch [![arXiv](https://img.shields.io/badge/arXiv-2305.12345-b31b1b.svg)](https://arxiv.org/pdf/2510.17858)
 
 ## Overview
 We introduce SCFM — a highly efficient post-training distillation method that converts many pre-trained flow matching diffusion model (e.g., Flux, SD3, etc) into a 3–8 step sampler in <1 A100 day.
@@ -36,6 +36,8 @@ Or, simply download the checkpoints from[![Hugging Face](https://img.shields.io/
 ```bash
 python inference/flux_scfm_gradio.py --port xxxx
 ```
+
+Tips: Using fewer steps generally requires a higher LoRA scale, typically within the safe range of [1, 1.75]. A lower timestep shift tends to produce sharper details but may introduce artifacts, while a higher timestep shift can preserve overall structure better at the cost of potential blurriness.
 
 ## What can you do with this? / What can be further optimized?
 - Incorporating this into your pretrained models allows them to maintain or improve their output fidelity while simultaneously boosting generation speed.
