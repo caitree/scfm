@@ -11,7 +11,6 @@ import sys
 
 from math import ceil
 from torchvision import transforms
-
 from PIL import Image
 from typing import (
     Tuple,
@@ -19,7 +18,7 @@ from typing import (
     Dict,
 )
 
-from diffusers.loaders.lora_pipeline import FluxLoraLoaderMixin
+from diffusers.loaders import FluxLoraLoaderMixin
 
 try:
     HAS_CUDA = torch.cuda.is_available()

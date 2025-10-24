@@ -3,7 +3,7 @@ import argparse
 import accelerate
 import time
 import logging
-# import gradio as gr
+import gradio as gr
 import numpy as np
 
 from typing import List
@@ -187,7 +187,6 @@ def main(lora_paths, prompt, width, height, cfg, true_cfg, shift, steps, seed, t
 
         logger.info("Removing previous LoRAs weights...")
         dit_unload_lora_weights(flux)
-
         if len(local_lora_paths) > 0:
             logger.info(f"Merging LoRAs from {global_lora_paths}")
             dit_lora_merge(flux, ' '.join(list(global_lora_paths)))
