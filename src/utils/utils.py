@@ -19,12 +19,7 @@ from typing import (
     Dict,
 )
 
-from diffusers.loaders.lora_base import _fetch_state_dict
-from diffusers.loaders.lora_conversion_utils import (
-    _convert_bfl_flux_control_lora_to_diffusers,
-    _convert_kohya_flux_lora_to_diffusers,
-    _convert_xlabs_flux_lora_to_diffusers,
-)
+from diffusers.loaders.lora_pipeline import FluxLoraLoaderMixin
 
 try:
     HAS_CUDA = torch.cuda.is_available()
@@ -160,90 +155,19 @@ def encode_image(imgpath, vae, default_max_size=768, specified_size=None) -> tor
     return cond_latent
 
 def lora_lora_state_dict(
-        pretrained_model_name_or_path_or_dict: Union[str, Dict[str, torch.Tensor]],
-        return_alphas: bool = False,
-        **kwargs,
-    ):
-        # Load the main state dict first which has the LoRA layers for either of
-        # transformer and text encoder or both.
-        cache_dir = kwargs.pop("cache_dir", None)
-        force_download = kwargs.pop("force_download", False)
-        proxies = kwargs.pop("proxies", None)
-        local_files_only = kwargs.pop("local_files_only", None)
-        token = kwargs.pop("token", None)
-        revision = kwargs.pop("revision", None)
-        subfolder = kwargs.pop("subfolder", None)
-        weight_name = kwargs.pop("weight_name", None)
-        use_safetensors = kwargs.pop("use_safetensors", None)
+    pretrained_model_name_or_path_or_dict: Union[str, Dict[str, torch.Tensor]],
+    return_alphas: bool = False,
+    **kwargs,
+):
+    kwargs["return_lora_metadata"] = True
+    state_dict, network_alphas, metadata = FluxLoraLoaderMixin.lora_state_dict(
+        pretrained_model_name_or_path_or_dict, return_alphas=return_alphas, **kwargs
+    )
+    has_lora_keys = any("lora" in key for key in state_dict.keys())
+    if not has_lora_keys:
+        raise ValueError("Invalid LoRA checkpoint.")
 
-        allow_pickle = False
-        if use_safetensors is None:
-            use_safetensors = True
-            allow_pickle = True
-
-        user_agent = {
-            "file_type": "attn_procs_weights",
-            "framework": "pytorch",
-        }
-
-        state_dict = _fetch_state_dict(
-            pretrained_model_name_or_path_or_dict=pretrained_model_name_or_path_or_dict,
-            weight_name=weight_name,
-            use_safetensors=use_safetensors,
-            local_files_only=local_files_only,
-            cache_dir=cache_dir,
-            force_download=force_download,
-            proxies=proxies,
-            token=token,
-            revision=revision,
-            subfolder=subfolder,
-            user_agent=user_agent,
-            allow_pickle=allow_pickle,
-        )
-        is_dora_scale_present = any("dora_scale" in k for k in state_dict)
-        if is_dora_scale_present:
-            warn_msg = "It seems like you are using a DoRA checkpoint that is not compatible in Diffusers at the moment. So, we are going to filter out the keys associated to 'dora_scale` from the state dict. If you think this is a mistake please open an issue https://github.com/huggingface/diffusers/issues/new."
-            logger.warning(warn_msg)
-            state_dict = {k: v for k, v in state_dict.items() if "dora_scale" not in k}
-
-        # TODO (sayakpaul): to a follow-up to clean and try to unify the conditions.
-        is_kohya = any(".lora_down.weight" in k for k in state_dict)
-        if is_kohya:
-            state_dict = _convert_kohya_flux_lora_to_diffusers(state_dict)
-            # Kohya already takes care of scaling the LoRA parameters with alpha.
-            return (state_dict, None) if return_alphas else state_dict
-
-        is_xlabs = any("processor" in k for k in state_dict)
-        if is_xlabs:
-            state_dict = _convert_xlabs_flux_lora_to_diffusers(state_dict)
-            # xlabs doesn't use `alpha`.
-            return (state_dict, None) if return_alphas else state_dict
-
-        is_bfl_control = any("query_norm.scale" in k for k in state_dict)
-        if is_bfl_control:
-            state_dict = _convert_bfl_flux_control_lora_to_diffusers(state_dict)
-            return (state_dict, None) if return_alphas else state_dict
-
-        # For state dicts like
-        # https://huggingface.co/TheLastBen/Jon_Snow_Flux_LoRA
-        keys = list(state_dict.keys())
-        network_alphas = {}
-        for k in keys:
-            if "alpha" in k:
-                alpha_value = state_dict.get(k)
-                if (torch.is_tensor(alpha_value) and torch.is_floating_point(alpha_value)) or isinstance(
-                    alpha_value, float
-                ):
-                    network_alphas[k] = state_dict.pop(k)
-                else:
-                    raise ValueError(
-                        f"The alpha key ({k}) seems to be incorrect. If you think this error is unexpected, please open as issue."
-                    )
-
-        if return_alphas:
-            return state_dict, network_alphas
-        else:
-            return state_dict
+    return state_dict, network_alphas, metadata
 
 
 def dit_lora_merge(dit, lora_paths, names=None) -> None:
@@ -261,15 +185,15 @@ def dit_lora_merge(dit, lora_paths, names=None) -> None:
         # adapter_name = os.path.splitext(os.path.basename(lora_path))[0]
         adapter_name = names[i] if names is not None else str(i)
         adapter_names.append(adapter_name)
-        lora_state_dict, network_alphas = lora_lora_state_dict(lora_path, return_alphas=True)
+        lora_state_dict, network_alphas, metadata = lora_lora_state_dict(lora_path, return_alphas=True)
 
         dit.load_lora_adapter(
             lora_state_dict,
             network_alphas=network_alphas,
             adapter_name=adapter_name,
+            metadata=metadata,
             _pipeline=None,
             low_cpu_mem_usage=False,
-            # torch_dtype=torch.float32,
         )
     dit.set_adapters(adapter_names=adapter_names, weights=adapter_weights)
 

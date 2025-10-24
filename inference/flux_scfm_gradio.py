@@ -1,16 +1,9 @@
 import torch
-import os
-import einops
-import json
-import random
-import copy
-import math
 import argparse
 import accelerate
-import diffusers
 import time
 import logging
-import gradio as gr
+# import gradio as gr
 import numpy as np
 
 from typing import List
@@ -27,17 +20,13 @@ from diffusers import (
 )
 from src.utils.flux_utils import encode_prompt
 from src.utils.utils import (
-    encode_image,
     get_noise,
-    setup_logging,
     post_process_img,
     clean_memory,
     dit_lora_merge,
     dit_unload_lora_weights,
-    pack_latents,
     unpack_latents,
     prepare_img_ids,
-    calculate_shift,
 )
 from src.mods.flux_teacache import teacache_forward
 from src.utils.train_utils import (
@@ -227,7 +216,7 @@ if __name__ == "__main__":
             gr.Markdown("## T2I Interface")
         with gr.Row():
             with gr.Column():
-                lora_paths = gr.Textbox(label="LoRA Path", value="output/flux-scfm/checkpoint-10000/pytorch_lora_weights.safetensors;1.5")
+                lora_paths = gr.Textbox(label="LoRA Path", value="output/flux-scfm/checkpoint-10000/pytorch_lora_weights.safetensors;1.6")
                 prompt = gr.TextArea(label="Prompt", value="An ultrarealistic, high-quality stock photo presents a majestic aerial view of a floating island kingdom, suspended amidst swirling clouds and bathed in ethereal light. Intricate bridges connect ornate towers and cascading gardens, while winged creatures soar gracefully through the celestial skies. The architecture speaks of advanced civilization and refined aesthetics, instilling a sense of wonder and igniting the imagination with endless narratives of heroic quests and untold legends.")
                 width = gr.Slider(minimum=128, maximum=2048, value=1024, step=64, label="width")
                 height = gr.Slider(minimum=128, maximum=2048, value=768, step=64, label="height")
@@ -236,7 +225,7 @@ if __name__ == "__main__":
                 shift = gr.Slider(minimum=1, maximum=5, value=3.25, step=0.1, label="shift")
                 steps = gr.Slider(minimum=1, maximum=50, value=5, step=1, label="Steps")
                 seed = gr.Slider(minimum=0, maximum=1000000, value=0, step=1, label="Seed")
-                thresh = gr.Slider(minimum=0, maximum=1, value=0, step=0.01, label="teacache threshold")
+                thresh = gr.Slider(minimum=0, maximum=1, value=0, step=0.01, label="Teacache threshold")
 
                 interface_button = gr.Button("Generate Image")
             with gr.Column():
