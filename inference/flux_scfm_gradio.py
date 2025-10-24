@@ -1,5 +1,8 @@
-import torch
 import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import torch
 import einops
 import json
 import random
@@ -198,7 +201,8 @@ def main(lora_paths, prompt, width, height, cfg, true_cfg, shift, steps, seed, t
 
         logger.info("Removing previous LoRAs weights...")
         dit_unload_lora_weights(flux)
-
+        # import pdb
+        # pdb.set_trace()
         if len(local_lora_paths) > 0:
             logger.info(f"Merging LoRAs from {global_lora_paths}")
             dit_lora_merge(flux, ' '.join(list(global_lora_paths)))
