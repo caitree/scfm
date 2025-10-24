@@ -22,7 +22,6 @@ python inference/sample_dataset.py \
 --resolution 1024 \
 --num_inference_steps 32 \
 --n_sample_per_bucket 8
-
 ```
    
 ## Training
@@ -32,6 +31,28 @@ bash scripts/train_flux_scfm.sh
 
 ## Inference
 After training, you can perform highly-customizable inference with gradio, e.g., kicking around with lora scales, timesteps shifting, cfg, or even merging with off-the-shelf loras, and etc.
-  ```bash
-  python inference/flux_scfm_gradio.py --port xxxx
-  ```
+
+Or, simply download the checkpoints from[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-yellow?)](https://huggingface.co/cxxai/scfm) or [![Civitai](https://img.shields.io/badge/Civitai-Model-blue?logo=civitai&logoColor=white)](https://civitai.com/models/2064593/shortcutfm-843-steps-loras), and run inference by providing the correct model path to the gradio script.
+```bash
+python inference/flux_scfm_gradio.py --port xxxx
+```
+
+## What can you do with this? / What can be further optimized?
+- Incorporating this into your pretrained models allows them to maintain or improve their output fidelity while simultaneously boosting generation speed.
+- Fine-tune SCFM on your own dataset to accelerate generation specifically for the data domains you care about.
+- Train without text encoders or VAEs by caching latents.
+- Improve upon our checkpoints: we trained under very limited computational resources, so you might be able to obtain even better results with larger batches, longer training, or higher resolution.
+- Note on model parallelism: it is currently unsupported due to the LoRA–EMA implementation design, but contributions to enable this are very welcome.
+- Resolution limits: the released checkpoints were trained at a maximum resolution of 512×512; higher-resolution training (e.g., >512) may yield further improvements.
+- Model and modality flexibility: you can replace FLUX with other flow-matching models or even extend SCFM to different modalities such as 3D, video, or audio, since our implementation works seamlessly with the [![Diffusers](https://img.shields.io/badge/%F0%9F%A4%97%20Diffusers-Repository-blue)](https://github.com/huggingface/diffusers) library.
+
+## 📖 Citation
+If you find our work useful, please consider citing our paper:
+```bibtex
+@inproceedings{scfm,
+  title = {Shortcutting Pre-trained Flow Matching Diffusion Models is Almost Free Lunch},
+  author = {Xu Cai and Yang Wu and Qianli Chen and Haoran Wu and Lichuan Xiang and Hongkai Wen},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year = {2025}
+}
+```
