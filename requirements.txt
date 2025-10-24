@@ -1,0 +1,14 @@
+accelerate
+datasets
+diffusers
+wandb
+peft
+huggingface-hub
+transformers
+einops
+safetensors
+sentencepiece
+bitsandbytes
+prodigyopt
+gradio
+albumentations
