@@ -1,6 +1,9 @@
 # Byte-compiled / optimized / DLL files
 output/
+outputs/
 flux_dataset_1024/
+sd3_dataset_1024/
+test.py
 .DS_Store
 
 __pycache__/

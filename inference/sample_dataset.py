@@ -4,7 +4,7 @@ import os
 from datasets import concatenate_datasets
 from diffusers import FluxPipeline, StableDiffusion3Pipeline
 
-from src.sample_data import (
+from src.utils.sample_data import (
     ASPECT_RATIO_512_BIN,
     ASPECT_RATIO_1024_BIN,
     ASPECT_RATIO_1024_BIN_SHORT,

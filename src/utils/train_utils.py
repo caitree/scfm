@@ -21,7 +21,7 @@ def unwrap_model(accelerator, model):
     model = model._orig_mod if is_compiled_module(model) else model
     return model
 
-def get_scfm_timesteps_flux(args, t_skip, latents, noise, device, dtype):
+def get_scfm_timesteps(args, t_skip, latents, noise, device, dtype, dyn_prob=0.1):
     bsz, _, h, w = latents.shape
     k = math.ceil(bsz * args.non_shortcut_ratio)
 
@@ -43,7 +43,7 @@ def get_scfm_timesteps_flux(args, t_skip, latents, noise, device, dtype):
             self_indices.append(i)
 
         timesteps = torch.linspace(1.0, 0, tts+1)
-        if np.random.rand() < 0.1: # perform dynamic shift
+        if np.random.rand() < dyn_prob: # perform dynamic shift
             mu = get_lin_function(y1=0.5, y2=1.15)((w // 2) * (h // 2))
             timesteps = time_shift(mu, 1.0, timesteps)
         else: # perform fixed shift
