@@ -1657,13 +1657,13 @@ def main(args):
 
                 accelerator.backward(loss)
 
-                if accelerator.sync_gradients:
-                    params_to_clip = (
-                        itertools.chain(transformer_lora_parameters, text_encoder_one.parameters())
-                        if args.train_text_encoder
-                        else itertools.chain(transformer_lora_parameters)
-                    )
-                    accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
+                # if accelerator.sync_gradients:
+                #     params_to_clip = (
+                #         itertools.chain(transformer_lora_parameters, text_encoder_one.parameters())
+                #         if args.train_text_encoder
+                #         else itertools.chain(transformer_lora_parameters)
+                #     )
+                #     accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
 
                 optimizer.step()
                 lr_scheduler.step()
@@ -1671,15 +1671,15 @@ def main(args):
 
                 # Apply EMA to LoRA parameters
                 slow_ema_decay_stu = 0.999
-                fast_ema_decay_stu = 0.99
+                fast_ema_decay_stu = 0
                 with torch.no_grad():
                     for name, current_param in transformer.named_parameters():
                         if name in slow_stu_lora_parameters_ema:
                             slow_stu_lora_parameters_ema[name].mul_(slow_ema_decay_stu).add_(current_param, alpha=1 - slow_ema_decay_stu)
                             fast_stu_lora_parameters_ema[name].mul_(fast_ema_decay_stu).add_(current_param, alpha=1 - fast_ema_decay_stu)
 
-                            accelerator.clip_grad_norm_(slow_stu_lora_parameters_ema[name], args.max_grad_norm)
-                            accelerator.clip_grad_norm_(fast_stu_lora_parameters_ema[name], args.max_grad_norm)
+                            # accelerator.clip_grad_norm_(slow_stu_lora_parameters_ema[name], args.max_grad_norm)
+                            # accelerator.clip_grad_norm_(fast_stu_lora_parameters_ema[name], args.max_grad_norm)
 
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:

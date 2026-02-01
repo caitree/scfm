@@ -50,7 +50,8 @@ Or, simply download the checkpoints from[![Hugging Face](https://img.shields.io/
 python inference/flux_scfm_gradio.py --port xxxx
 ```
 
-Tips: Using fewer steps generally requires a higher LoRA scale, typically within the safe range of [1, 1.75]. A lower timestep shift tends to produce sharper details but may introduce artifacts, while a higher timestep shift can preserve overall structure better at the cost of potential blurriness.
+Tips: Using fewer steps generally requires a higher **LoRA scale**, typically within the safe range of [1, 1.75].  For example, a scale of 1.2 works well for 8 steps, while 1.6 is recommended for 4 steps -- <u>*this behaves similarly to the &Delta;t parameter in shortcut models, controlling the step-size of the velocity*.</u>  
+A lower timestep shift tends to produce sharper details but may introduce artifacts, while a higher timestep shift can preserve overall structure better at the cost of potential blurriness.
 
 The SD35 checkpoint is only trained with null (empty) negative prompts, so it is recommended to use null negative prompts when using it.
 

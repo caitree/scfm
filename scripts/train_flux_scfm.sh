@@ -15,7 +15,7 @@ acc_args=(
 train_args=(
 --pretrained_model_name_or_path $MODEL_NAME \
 --train_data_path $DATA_PATH \
---train_batch_size 8 \
+--train_batch_size 4 \
 --gradient_accumulation_steps 1 \
 --dataloader_num_workers 4 \
 --resolution 512 \
@@ -25,7 +25,7 @@ train_args=(
 --mixed_precision bf16 \
 --optimizer AdamW \
 # --use_8bit_adam \
---max_grad_norm 10.0 \
+# --max_grad_norm 10.0 \
 --gradient_checkpointing \
 --checkpointing_steps 200 \
 --num_train_epochs 10000 \
